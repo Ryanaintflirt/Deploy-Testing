@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Profile - HealthCare Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-heartbeat"></i> HealthCare AI
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('index') }}" class="nav-link">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('symptoms_check') }}" class="nav-link">
+                        <i class="fas fa-search-plus"></i> Symptom Check
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('predict_diseases') }}" class="nav-link">
+                        <i class="fas fa-stethoscope"></i> Predict Diseases
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('doctors') }}" class="nav-link">
+                        <i class="fas fa-user-md"></i> Doctor
+                    </a>
+                </li>
+                {% if username %}
+                <li class="nav-item dropdown">
+                    <a href="#profile" class="nav-link profile-link">
+                        <i class="fas fa-user-circle"></i> {{ username }}
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('view_profile') }}">
+                            <i class="fas fa-user-edit"></i> View Profile
+                        </a>
+                        <a href="{{ url_for('appointment') }}">
+                            <i class="fas fa-calendar-check"></i> Appointments
+                        </a>
+                        <a href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a href="{{ url_for('login') }}" class="nav-link">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="prediction-container">
+            <!-- Header -->
+            <div class="prediction-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-calendar-plus"></i> Book Appointment</h1>
+                    <p>Schedule your consultation with a qualified healthcare professional</p>
+                </div>
+            </div>
+
+            <!-- Appointment Form Card -->
+            <div class="prediction-form-container">
+                <form id="appointmentForm" class="form-grid">
+                    <div class="header-content">
+                        <p1>Upgrade to our Premium Plan and enjoy exclusive features:</p1>
+                        <ul>
+                            <li><strong>Direct Doctor Appointments:</strong> Schedule consultations with qualified healthcare professionals anytime, right from your account.</li>
+                            <li><strong>Priority Booking:</strong> Get faster appointment confirmations and preferred time slots.</li>
+                            <li><strong>Comprehensive History:</strong> Access and manage all your past and upcoming appointments in one place.</li>
+                            <li><strong>Personalized Care:</strong> Receive recommendations tailored to your health profile.</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Appointment Policy</h3>
+                    <p>Please arrive 10 minutes before your scheduled time. For cancellations, notify us at least 24 hours in advance.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Help</h3>
+                    <p>Contact support for booking assistance or questions about consultation.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 HealthCare AI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('appointmentForm');
+            const cancelBtn = document.getElementById('cancelAppointmentBtn');
+
+            cancelBtn.addEventListener('click', function() {
+                window.history.back();
+            });
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const fd = new FormData(form);
+                const payload = Object.fromEntries(fd.entries());
+
+                try {
+                    const res = await fetch('/appointments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Failed to book appointment');
+                    alert('Appointment booked successfully');
+                    window.location.href = '/doctors';
+                } catch (err) {
+                    alert(err.message || 'Booking failed');
+                }
+            });
+        });
+    </script>
+    <script src="{{ url_for('static', filename='custom.js') }}"></script>
+</body>
+</html>
+
+

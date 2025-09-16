@@ -1,0 +1,27 @@
+# Python cache & build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.log
+
+# Development and research files
+research/
+*.ipynb
+*.pdf
+
+# Local data not needed in production
+data/
+
+# Temporary build folders
+dist/
+build/
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Environment files (optional: only if you inject secrets through platform)
+SECRET.env
