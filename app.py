@@ -84,18 +84,18 @@ def load_models():
 
 # Firebase Configuration
 FIREBASE_CONFIG = {
-    "apiKey": os.getenv('FIREBASE_API_KEY'),
-    "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
-    "projectId": os.getenv('FIREBASE_PROJECT_ID'),
-    "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
-    "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
-    "appId": os.getenv('FIREBASE_APP_ID'),
-    "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID'),
-    "databaseURL": os.getenv('FIREBASE_DATABASE_URL')
+    "apiKey": "AIzaSyDBJt1k0mgiEiC3CT27GbUwoQrKId4dXm0",
+    "authDomain": "healthcare-620a8.firebaseapp.com",
+    "projectId": "healthcare-620a8",
+    "storageBucket": "healthcare-620a8.firebasestorage.app",
+    "messagingSenderId": "992957587185",
+    "appId": "1:130404881524:web:013a99a998da81c48ead21",
+    "measurementId": "G-CJXL0BMB4J",
+    "databaseURL": "https://healthcare-620a8-default-rtdb.firebaseio.com/"
 }
 
 # AI Chatbot Configuration
-API_KEY = os.getenv('DEEPSEEK_API_KEY', "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")
+API_KEY = "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"
 CHATBOT_URL = "https://openrouter.ai/api/v1/chat/completions"
 CHATBOT_HEADERS = {
     "Authorization": f"Bearer {API_KEY}",
@@ -103,6 +103,7 @@ CHATBOT_HEADERS = {
     "X-Title": "HealthCare",
     "Content-Type": "application/json"
 }
+
 
 
 @app.route('/')
