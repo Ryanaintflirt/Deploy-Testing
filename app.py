@@ -95,7 +95,7 @@ FIREBASE_CONFIG = {
 }
 
 # AI Chatbot Configuration
-API_KEY = "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"
+API_KEY = "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"
 CHATBOT_URL = "https://openrouter.ai/api/v1/chat/completions"
 CHATBOT_HEADERS = {
     "Authorization": f"Bearer {API_KEY}",
@@ -239,82 +239,86 @@ def login():
     if request.method == 'POST':
         try:
             data = request.get_json()
-            auth_type = data.get('authType', 'firebase')  # 'firebase' or 'custom'
-            
+            auth_type = data.get('authType', 'firebase')
+
             if auth_type == 'firebase':
                 # Firebase Google authentication
                 id_token = data.get('idToken')
-                
                 if not id_token:
                     return jsonify({'error': 'No ID token provided'}), 400
-                
-                # Verify the ID token using Firebase REST API
+
+                # Verify the ID token
                 user_data = verify_firebase_token(id_token)
-                
                 if not user_data:
                     return jsonify({'error': 'Invalid token'}), 401
-                
-                # Check if user exists in our database
+
+                # Look for user by firebase_uid
                 user = User.query.filter_by(firebase_uid=user_data['uid']).first()
-                
+
                 if not user:
-                    # Create new Google user
-                    user = User.create_google_user(
-                        firebase_uid=user_data['uid'],
-                        email=user_data['email'],
-                        full_name=user_data['name'],
-                        profile_picture=user_data.get('photoURL')
-                    )
-                
+                    # If no firebase_uid, check if a user exists with the same email
+                    user = User.query.filter_by(email=user_data['email']).first()
+                    if user:
+                        # Link the existing account to this Firebase UID
+                        user.firebase_uid = user_data['uid']
+                    else:
+                        # Create new Google user
+                        user = User.create_google_user(
+                            firebase_uid=user_data['uid'],
+                            email=user_data['email'],
+                            full_name=user_data['name'],
+                            profile_picture=user_data.get('photoURL')
+                        )
+                    db.session.commit()
+
                 # Update last login
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-                
-                # Login user with Flask-Login
+
+                # Login user
                 login_user(user, remember=True)
-                
+
                 return jsonify({
                     'success': True,
                     'message': 'Google login successful!',
                     'user': user.to_dict()
                 })
-                
+
             elif auth_type == 'custom':
                 # Custom email/password authentication
                 email = data.get('email')
                 password = data.get('password')
-                
+
                 if not email or not password:
                     return jsonify({'error': 'Email and password are required'}), 400
-                
-                # Find user by email
+
                 user = User.query.filter_by(email=email, auth_method='custom').first()
-                
                 if not user or not user.check_password(password):
                     return jsonify({'error': 'Invalid email or password'}), 401
-                
+
                 if not user.is_active:
                     return jsonify({'error': 'Account is deactivated'}), 401
-                
+
                 # Update last login
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-                
-                # Login user with Flask-Login
+
+                # Login user
                 login_user(user, remember=True)
-                
+
                 return jsonify({
                     'success': True,
                     'message': 'Login successful!',
                     'user': user.to_dict()
                 })
-            
+
             else:
                 return jsonify({'error': 'Invalid authentication type'}), 400
-                
+
         except Exception as e:
             return jsonify({'error': f'Authentication failed: {str(e)}'}), 500
-    
+
+    # GET request
     return render_template("login.html", firebase_config=FIREBASE_CONFIG)
 
 @app.route('/register', methods=['GET', 'POST'])
